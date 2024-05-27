@@ -17,7 +17,7 @@ class XMLRenderer(BaseRenderer):
     format = "xml"
     charset = "utf-8"
     item_tag_name = "list-item"
-    root_tag_name = "root"
+    root_tag_name = None
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
         """
@@ -28,13 +28,19 @@ class XMLRenderer(BaseRenderer):
 
         stream = StringIO()
 
+        should_use_root_tag: bool = self.root_tag_name is not None and len(self.root_tag_name) > 0
+
         xml = SimplerXMLGenerator(stream, self.charset)
         xml.startDocument()
-        xml.startElement(self.root_tag_name, {})
+
+        if should_use_root_tag is True:
+            xml.startElement(self.root_tag_name, {})
 
         self._to_xml(xml, data)
 
-        xml.endElement(self.root_tag_name)
+        if should_use_root_tag is True:
+            xml.endElement(self.root_tag_name)
+
         xml.endDocument()
         return stream.getvalue()
 
